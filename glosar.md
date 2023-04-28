@@ -1,0 +1,48 @@
+# Glosar de termeni
+
+## Semnatura electronica
+
+Un mesaj criptografic atasat unui document (de multe ori e inclus in document dar poate fi si separat), care face legatura intre continutul documentului si un semnatar. Daca se respecta un anumit set de conditii, se poate garanta ca o anumita persoana a avut in posesie acel document la o anumita data. Ceva mai formal, semnatura poate avea proprietati de autentificare (identifica semnatarul), integritate (certifica faptul ca documentul nu s-a modificat) si non-repudiere (semnatarul nu poate sa nege ca l-a semnat). Regulamentul european EIDAS defineste cateva categorii de semnaturi si descrie criteriile necesare ca o semnatura electronica sa poata fi echivalata juridic cu una fizica.
+
+## Semnatura electronica (cf. EIDAS)
+Atentie! Din punct de vedere juridic, definitia de "semnatura electronica" din regulamentul EIDAS se refera la orice fel de date atasate documentului care pot fi legate de un semnatar. Banuiesc ca aceasta formulare a fost introdusa pentru a putea lua in considerare in anumite situatii juridice si lucruri gen "imagine a semnaturii olografe inclusa in document", care ar putea implica prezenta unui semnatar, chiar daca asta nu implica garantii de autentificare / integrritate / non-repudiere. Multa lume se leaga de art. 25, paragraful 1 care mentioneaza ca "nu i se refuza efectul juridic si poate fi acceptata ca proba", dar neglijeaza faptul ca in paragraful urmator se specifica ca echivalarea cu semnatura olografa se face doar de semnaturi calificate. In EIDAS sunt precizate calificativele de "semnatura avansata" respectiv "semnatura calificata" pentru a se referi la semnaturi cu garantii criptografice.
+
+## Semnatura criptografica
+Generic vorbind, semnarea dpdv criptografic se bazeaza pe primitivele de hash si cea de criptare asimetrica, si functioneaza in felul urmator:
+- se determina un hash al datelor ce urmeaza a fi semnate;
+- se cripteaza hashul respectiv cu cheia privata a semnatarului;
+- se genereaza un pachet de date care contine cel putin hashul criptat, cheia publica si precizari privind algoritmii folositi.
+
+Validarea semnaturii se face decriptand hashul criptat cu cheia publica si comparand cu hashul calculat din nou pe datele semnate (algoritmul e cunoscut din semnatura).
+
+Proprietatile semnaturii se stabilesc in felul urmator:
+- **Autentificarea** e data daca cheia publica este legata cumva de semnatar (in mod normal via un certificat x509, dar pot exista si alte mecanisme)
+- **Integritatea** e data de obtinerea in mod independent al aceluiasi hash (este necesara utilizarea unor algoritmi de hash criptografic respectiv de criptare asimetrica considerat sigure, in sensul ca nu exista metode cunoscute prin care sa poata fi produs un alt document cu hash cunoscut, respectiv nu se poate produce o varianta criptata a unui hash gresit fara acces la cheia privata)
+- **Non-repudierea** este data daca se confirma cumva ca doar semnatarul pretins putea fi in controlul cheii la momentul semnarii (prin proceduri de management al cheilor si in mod curent prin folosirea de dispozitive criptografice care garanteaza)
+
+Facand legatura cu EIDAS, "semnatura electronica avansata" e una care incearca sa indeplineasca intr-o oarecare masura aceste obiective, iar "semnatura electronica calificata" precizeaza folosirea de dispozitive calificate si de certificate obtinute de la autoritati de certificare predefinite.
+
+## Semnatura PDF
+Formatul PDF e foarte popular pentru documente semnate deoarece standardul specifica explicit modul in care poate contine semnaturi. De notat ca semnatura efectiva e un sir de biti care nu apare efectiv in forma randata, dar se practica ca la semnare sa se introduca elemente grafice care sa denote informatii despre prezenta unei semnaturi si care sa poata fi echivalate vizual cu o semnatura olografa in forma tiparita a documentului. Aceste elemente grafice nu ar trebui luate in considerare pentru validarea semnaturii intrucat nu sunt in mod obligatoriu legate de semnatar. Intrucat formatul PDF e intentionat sa fie modificat doar prin adaugarea de noi date la sfarsitul documentului, ar trebui sa se poata reconstitui exact forma documentului din momentul semnarii si sa se tina seama ca aspectul vizibil al documentului a putut fi alterat ulterior (se practica sa se adauge doar elementele grafice care tin de semnatura, dar nu e obligatoriu, de exemplu se pot modifica niste sume dintr-un contract). In mod normal semnatura din documentul PDF precizeaza o plaja de biti care acopera intreg documentul mai putin exact suma de control semnata. O semnatura care nu acopera astfel tot documentul (sau mai bine zis, versiunea documentului din momentul semnarii), ofera mai putine garantii de integritate si trebuie analizata cu atentie.
+
+In plus, tinand cont ca documentele sunt gandite sa fie stocate multa vreme, se pot introduce in semnatura asa-zise informatii LTV (long-term validation), care sa reflecte validitatea semnaturii la momentul aplicarii ei. Asta in general inseamna infromatii privind momentul semnarii si informatii privind non-repudierea cheii, semnate de o autoritate externa.
+
+## Certificat X509
+X509 este un standard de atestare a legaturii dintre o pereche de chei asimetrice si un posesor. Este probabil mai cunoscut pentru certificate HTTPS, dar acelasi mecanism este folosit si pentru certificatele de semnatura digitala. El contine urmatoarele date:
+- subiectul certificatului, care ar trebui sa reflecte identitatea semnatarului, pentru a putea fi comparat in scopul autentificarii. In cazul certificatelor web acesta este numele domeniului si eventual alte informatii despre detinator, dar in mod frustrant in cazul certificatelor personale, nu exista un standard agreat. In general este numele si prenumele detinatorului fie impreuna fie ca informatii separate (unele autoritati de certificare nu suporta utf-8 asa ca se foloseste o transformare in ascii) si poate contine o serie de act de identitate sau o serie numerica prin care emitentul sa poata identifica unic persoana. Este foarte posibil ca cel care valideaza identitatea sa nu aiba toate informatiile necesare sa o faca de unul singur (in ce masura asta e in contraventie cu EIDAS e o intrebare dincolo de competenta mea)
+- cheia publica a semnatarului (si evident standardul de chei asimetrice folosit)
+- datele de valabilitate a certificatului (in general maxim un an distanta intre ele) - indica ca acest certificat e considerat automat invalid in orice moment inainte si dupa acele doua timestamp-uri (de notat ca certificatul poate fi revocat prematur)
+- date de identificare a autoritatii emitente
+- semnatura a autoritatii emitente
+
+De notat ca semnatura autoritatii se valideaza printr-un mecanism similar, generand un mecanism recursiv numit "lant de incredere". Pentru ca completa validarea, lantul de incredere trebuie cumva ancorat intr-un certificat dintr-o lista prestabilita de autoritati de incredere explicite, care e la latitudinea utilizatorului. Regulamentul EIDAS prevede mecanisme de intretinere unui asa-numit "trusted list" la nivel european care poate fi obtinut din resurse publice. Una din conditiile ca un certificat sa poata fi considerat "calificat" este sa fie ancorat in oricare din certificatele din lista respectiva.
+
+Autoritatea poate sa revoce prematur un certificat si in acest scop poate pune la dispozitia publicului una sau ambele din urmatoarele mecanisme: CRL este o lista statica a certificatelor revocate (mai exact o lista de identificatori), respectiv OCSP, un serviciu online de verificare daca un anumit certificat a fost revocat sau nu. Mecanismul LTV al semnaturilor presupune atasarea unui astfel de raspuns.
+
+## Dispozitiv calificat
+Acesta este un echipament fizic care contine una sau mai multe seturi de chei asimetrice si permite semnarea autentificata cu ele. Principiul dupa care sunt construite este ca e imposibila extragerea unei chei private din echipament fara distrugerea echipamentului, garantand astfel echivalarea logica a controlului asupra cheii private cu controlul asupra echipamentului fizic. Este adesea vazut ca un dispozitiv USB portabil, dar poate fi prezent ca componenta a unui telefon mobil sau ca un server conceput pentru operarea intr-un datacenter. In oricare din cazuri, operatiile cu cheia privata sunt autorizate prin folosirea de factori suplimentari de autentificare, dupa caz.
+
+Din diverse ratiuni operationale, e de asteptat ca fiecare autoritate de certificare sa ofere dispozitivul propriu (nu e fezabil sa se valideze un dispozitiv pus la dispozitie de utilizator, chiar daca e primit de la o alta autoritate).
+
+## Sigiliul electronic
+Regulamentul EIDAS defineste un tip de semnatura numit sigiliu. Din punct de vedere tehnic functioneaza exact la fel ca o semnatura electronica, dar definitia e data de asa natura incat sa permita aplicarea lui automata (cu alte cuvinte nu e necesara utilizarea unui dispozitiv calificat care sa necesite autorizarea multifactor explicit la fiecare aplicare) si relaxeaza implicatiile lui juridice intr-un mod subtil care (din cate am inteles de la alti specialisti) il face echivalent cu o stampila. In practica este folosit ca o "semnatura institutionala" care implica o organizatie si nu o persoana anume si care poate fi folosit in mod automat fara necesitatea prezentei unei persoane in flux (un "semnat ca primarul" electronic, cum ar veni).
