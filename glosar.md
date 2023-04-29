@@ -19,7 +19,7 @@ Validarea semnaturii se face decriptand hashul criptat cu cheia publica si compa
 Proprietatile semnaturii se stabilesc in felul urmator:
 - **Autentificarea** e data daca cheia publica este legata cumva de semnatar (in mod normal via un certificat x509, dar pot exista si alte mecanisme)
 - **Integritatea** e data de obtinerea in mod independent al aceluiasi hash (este necesara utilizarea unor algoritmi de hash criptografic respectiv de criptare asimetrica considerat sigure, in sensul ca nu exista metode cunoscute prin care sa poata fi produs un alt document cu hash cunoscut, respectiv nu se poate produce o varianta criptata a unui hash gresit fara acces la cheia privata)
-- **Non-repudierea** este data daca se confirma cumva ca doar semnatarul pretins putea fi in controlul cheii la momentul semnarii (prin proceduri de management al cheilor si in mod curent prin folosirea de dispozitive criptografice care garanteaza)
+- **Non-repudierea** este data daca se confirma cumva ca doar semnatarul pretins putea fi in controlul cheii la momentul semnarii (prin proceduri de management al cheilor si in mod normal prin folosirea de dispozitive criptografice calificate)
 
 Facand legatura cu EIDAS, "semnatura electronica avansata" e una care incearca sa indeplineasca intr-o oarecare masura aceste obiective, iar "semnatura electronica calificata" precizeaza folosirea de dispozitive calificate si de certificate obtinute de la autoritati de certificare predefinite.
 
